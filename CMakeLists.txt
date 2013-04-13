@@ -18,16 +18,21 @@ else()
 endif()
 
 set(SRC_DIR "src")
+set(INC_DIR "include")
 
 file(GLOB SRC_LIST
 	"${SRC_DIR}/jsoncpp/*.h"
 	"${SRC_DIR}/jsoncpp/*.cpp"
 	"${SRC_DIR}/jsoncpp/json/*.h"
 	"${SRC_DIR}/jsoncpp/json/*.cpp"
+	"${INC_DIR}/jsoncpp/*.h"
+	"${INC_DIR}/jsoncpp/*.cpp"
+	"${INC_DIR}/jsoncpp/json/*.h"
+	"${INC_DIR}/jsoncpp/json/*.cpp"
 )
 
-include_directories(${SRC_DIR})
-include_directories("${SRC_DIR}/jsoncpp")
+include_directories(${INC_DIR})
+include_directories("${INC_DIR}/jsoncpp")
 add_library(${PROJECT_NAME} ${LIB_TYPE} ${SRC_LIST})
 
 if(SSVJSONCPP_BUILD_SHARED_LIB)
