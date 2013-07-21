@@ -215,7 +215,7 @@ Reader::Reader(const Features& features) : errors_(), document_(), begin_(), end
 bool Reader::parse(const std::string& document, Value& root, bool collectComments) {
 	document_ = document;
 	const char* begin = document_.c_str();
-	const char* end = begin + document_.length();
+	const char* end = begin + document_.size();
 	return parse(begin, end, root, collectComments);
 }
 
@@ -1475,7 +1475,7 @@ ValueIteratorBase::ValueIteratorBase()
   #endif
 		,
 		comments_(nullptr) {
-	  value_.string_ = duplicateStringValue(value.c_str(), (unsigned int)value.length());
+	  value_.string_ = duplicateStringValue(value.c_str(), (unsigned int)value.size());
   }
 
   Value::Value(const StaticString& value)
@@ -1500,7 +1500,7 @@ ValueIteratorBase::ValueIteratorBase()
   #endif
 		,
 		comments_(0) {
-	  value_.string_ = duplicateStringValue(value, value.length());
+	  value_.string_ = duplicateStringValue(value, value.size());
   }
   #endif
 
@@ -2434,7 +2434,7 @@ ValueIteratorBase::ValueIteratorBase()
 
   void Path::makePath(const std::string& path, const InArgs& in) {
 	  const char* current = path.c_str();
-	  const char* end = current + path.length();
+	  const char* end = current + path.size();
 	  InArgs::const_iterator itInArg = in.begin();
 	  while (current != end) {
 		  if (*current == '[') {
@@ -2883,7 +2883,7 @@ ValueIteratorBase::ValueIteratorBase()
 		  int lineLength = 4 + (size - 1) * 2; // '[ ' + ', '*n + ' ]'
 		  for (int index = 0; index < size && !isMultiLine; ++index) {
 			  writeValue(value[index]);
-			  lineLength += int(childValues_[index].length());
+			  lineLength += int(childValues_[index].size());
 			  isMultiLine = isMultiLine && hasCommentForValue(value[index]);
 		  }
 		  addChildValues_ = false;
@@ -2901,7 +2901,7 @@ ValueIteratorBase::ValueIteratorBase()
 
   void StyledWriter::writeIndent() {
 	  if (!document_.empty()) {
-		  char last = document_[document_.length() - 1];
+		  char last = document_[document_.size() - 1];
 		  if (last == ' ') // already indented
 			  return;
 		  if (last != '\n') // Comments may add new-line
@@ -2942,9 +2942,9 @@ ValueIteratorBase::ValueIteratorBase()
 
   std::string StyledWriter::normalizeEOL(const std::string& text) {
 	  std::string normalized;
-	  normalized.reserve(text.length());
+	  normalized.reserve(text.size());
 	  const char* begin = text.c_str();
-	  const char* end = begin + text.length();
+	  const char* end = begin + text.size();
 	  const char* current = begin;
 	  while (current != end) {
 		  char c = *current++;
@@ -3084,7 +3084,7 @@ ValueIteratorBase::ValueIteratorBase()
 		  int lineLength = 4 + (size - 1) * 2; // '[ ' + ', '*n + ' ]'
 		  for (int index = 0; index < size && !isMultiLine; ++index) {
 			  writeValue(value[index]);
-			  lineLength += int(childValues_[index].length());
+			  lineLength += int(childValues_[index].size());
 			  isMultiLine = isMultiLine && hasCommentForValue(value[index]);
 		  }
 		  addChildValues_ = false;
@@ -3106,7 +3106,7 @@ ValueIteratorBase::ValueIteratorBase()
 
 	   if ( !document_.empty() )
 	   {
-	   char last = document_[document_.length()-1];
+	   char last = document_[document_.size()-1];
 	   if ( last == ' ' )     // already indented
 	   return;
 	   if ( last != '\n' )    // Comments may add new-line
@@ -3148,9 +3148,9 @@ ValueIteratorBase::ValueIteratorBase()
 
   std::string StyledStreamWriter::normalizeEOL(const std::string& text) {
 	  std::string normalized;
-	  normalized.reserve(text.length());
+	  normalized.reserve(text.size());
 	  const char* begin = text.c_str();
-	  const char* end = begin + text.length();
+	  const char* end = begin + text.size();
 	  const char* current = begin;
 	  while (current != end) {
 		  char c = *current++;
