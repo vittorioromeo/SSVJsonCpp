@@ -88,11 +88,13 @@ license you like.
  * It is an internal header that must not be exposed.
  */
 
+using namespace std;
+
 namespace Json {
 
 /// Converts a unicode code-point to UTF-8.
-static inline std::string codePointToUTF8(unsigned int cp) {
-	std::string result;
+static inline string codePointToUTF8(unsigned int cp) {
+	string result;
 
 	// based on description from http://en.wikipedia.org/wiki/UTF-8
 
@@ -212,23 +214,23 @@ Reader::Reader() : errors_(), document_(), begin_(), end_(), current_(), lastVal
 
 Reader::Reader(const Features& features) : errors_(), document_(), begin_(), end_(), current_(), lastValueEnd_(), lastValue_(), commentsBefore_(), features_(features), collectComments_() {}
 
-bool Reader::parse(const std::string& document, Value& root, bool collectComments) {
+bool Reader::parse(const string& document, Value& root, bool collectComments) {
 	document_ = document;
 	const char* begin = document_.c_str();
 	const char* end = begin + document_.size();
 	return parse(begin, end, root, collectComments);
 }
 
-bool Reader::parse(std::istream& sin, Value& root, bool collectComments) {
-	// std::istream_iterator<char> begin(sin);
-	// std::istream_iterator<char> end;
+bool Reader::parse(istream& sin, Value& root, bool collectComments) {
+	// istream_iterator<char> begin(sin);
+	// istream_iterator<char> end;
 	// Those would allow streamed input from a file, if parse() were a
 	// template function.
 
-	// Since std::string is reference-counted, this at least does not
+	// Since string is reference-counted, this at least does not
 	// create an extra copy.
-	std::string doc;
-	std::getline(sin, doc, (char)EOF);
+	string doc;
+	getline(sin, doc, (char)EOF);
 	return parse(doc, root, collectComments);
 }
 
@@ -439,10 +441,10 @@ void Reader::addComment(Location begin, Location end, CommentPlacement placement
 	assert(collectComments_);
 	if (placement == commentAfterOnSameLine) {
 		assert(lastValue_ != 0);
-		lastValue_->setComment(std::string(begin, end), placement);
+		lastValue_->setComment(string(begin, end), placement);
 	} else {
 		if (!commentsBefore_.empty()) commentsBefore_ += "\n";
-		commentsBefore_ += std::string(begin, end);
+		commentsBefore_ += string(begin, end);
 	}
 }
 
@@ -483,7 +485,7 @@ bool Reader::readString() {
 
 bool Reader::readObject(Token& /*tokenStart*/) {
 	Token tokenName;
-	std::string name;
+	string name;
 	currentValue() = Value(objectValue);
 	while (readToken(tokenName)) {
 		bool initialTokenOk = true;
@@ -568,7 +570,7 @@ bool Reader::decodeNumber(Token& token) {
 	Value::LargestUInt value = 0;
 	while (current < token.end_) {
 		Char c = *current++;
-		if (c < '0' || c > '9') return addError("'" + std::string(token.start_, token.end_) + "' is not a number.", token);
+		if (c < '0' || c > '9') return addError("'" + string(token.start_, token.end_) + "' is not a number.", token);
 		Value::UInt digit(c - '0');
 		if (value >= threshold) {
 			// We've hit or exceeded the max value divided by 10 (rounded down). If
@@ -614,23 +616,23 @@ bool Reader::decodeDouble(Token& token) {
 		buffer[length] = 0;
 		count = sscanf(buffer, format, &value);
 	} else {
-		std::string buffer(token.start_, token.end_);
+		string buffer(token.start_, token.end_);
 		count = sscanf(buffer.c_str(), format, &value);
 	}
 
-	if (count != 1) return addError("'" + std::string(token.start_, token.end_) + "' is not a number.", token);
+	if (count != 1) return addError("'" + string(token.start_, token.end_) + "' is not a number.", token);
 	currentValue() = value;
 	return true;
 }
 
 bool Reader::decodeString(Token& token) {
-	std::string decoded;
+	string decoded;
 	if (!decodeString(token, decoded)) return false;
 	currentValue() = decoded;
 	return true;
 }
 
-bool Reader::decodeString(Token& token, std::string& decoded) {
+bool Reader::decodeString(Token& token, string& decoded) {
 	decoded.reserve(token.end_ - token.start_ - 2);
 	Location current = token.start_ + 1; // skip '"'
 	Location end = token.end_ - 1;	   // do not include '"'
@@ -717,7 +719,7 @@ bool Reader::decodeUnicodeEscapeSequence(Token& token, Location& current, Locati
 	return true;
 }
 
-bool Reader::addError(const std::string& message, Token& token, Location extra) {
+bool Reader::addError(const string& message, Token& token, Location extra) {
 	ErrorInfo info;
 	info.token_ = token;
 	info.message_ = message;
@@ -737,7 +739,7 @@ bool Reader::recoverFromError(TokenType skipUntilToken) {
 	return false;
 }
 
-bool Reader::addErrorAndRecover(const std::string& message, Token& token, TokenType skipUntilToken) {
+bool Reader::addErrorAndRecover(const string& message, Token& token, TokenType skipUntilToken) {
 	addError(message, token);
 	return recoverFromError(skipUntilToken);
 }
@@ -769,7 +771,7 @@ void Reader::getLocationLineAndColumn(Location location, int& line, int& column)
 	++line;
 }
 
-std::string Reader::getLocationLineAndColumn(Location location) const {
+string Reader::getLocationLineAndColumn(Location location) const {
 	int line, column;
 	getLocationLineAndColumn(location, line, column);
 	char buffer[18 + 16 + 16 + 1];
@@ -778,10 +780,10 @@ std::string Reader::getLocationLineAndColumn(Location location) const {
 }
 
 // Deprecated. Preserved for backward compatibility
-std::string Reader::getFormatedErrorMessages() const { return getFormattedErrorMessages(); }
+string Reader::getFormatedErrorMessages() const { return getFormattedErrorMessages(); }
 
-std::string Reader::getFormattedErrorMessages() const {
-	std::string formattedMessage;
+string Reader::getFormattedErrorMessages() const {
+	string formattedMessage;
 	for (Errors::const_iterator itError = errors_.begin(); itError != errors_.end(); ++itError) {
 		const ErrorInfo& error = *itError;
 		formattedMessage += "* " + getLocationLineAndColumn(error.token_.start_) + "\n";
@@ -791,7 +793,7 @@ std::string Reader::getFormattedErrorMessages() const {
 	return formattedMessage;
 }
 
-std::istream& operator>>(std::istream& sin, Value& root) {
+istream& operator>>(istream& sin, Value& root) {
 	Json::Reader reader;
 	bool ok = reader.parse(sin, root, true);
 	if (!ok) {
@@ -1003,17 +1005,17 @@ ValueIteratorBase::ValueIteratorBase()
   #else
 	  // Iterator for null value are initialized using the default
 	  // constructor, which initialize current_ to the default
-	  // std::map::iterator. As begin() and end() are two instance
-	  // of the default std::map::iterator, they can not be compared.
+	  // map::iterator. As begin() and end() are two instance
+	  // of the default map::iterator, they can not be compared.
 	  // To allow this, we handle this comparison specifically.
 	  if (isNull_ && other.isNull_) {
 		  return 0;
 	  }
 
-	  // Usage of std::distance is not portable (does not compile with Sun Studio 12 RogueWave STL,
+	  // Usage of distance is not portable (does not compile with Sun Studio 12 RogueWave STL,
 	  // which is the one used by default).
 	  // Using a portable hand-made version for non random iterator instead:
-	  //   return difference_type( std::distance( current_, other.current_ ) );
+	  //   return difference_type( distance( current_, other.current_ ) );
 	  difference_type myDistance = 0;
 	  for (Value::ObjectValues::iterator it = current_; it != other.current_; ++it) {
 		  ++myDistance;
@@ -1466,7 +1468,7 @@ ValueIteratorBase::ValueIteratorBase()
 	  value_.string_ = duplicateStringValue(beginValue, (unsigned int)(endValue - beginValue));
   }
 
-  Value::Value(const std::string& value)
+  Value::Value(const string& value)
 	  : type_(stringValue),
 		allocated_(true)
   #ifdef JSON_VALUE_USE_INTERNAL_MAP
@@ -1704,7 +1706,7 @@ ValueIteratorBase::ValueIteratorBase()
 	  return value_.string_;
   }
 
-  std::string Value::asString() const {
+  string Value::asString() const {
 	  switch (type_) {
 	  case nullValue:
 		  return "";
@@ -2076,9 +2078,9 @@ ValueIteratorBase::ValueIteratorBase()
   #endif
   }
 
-  Value& Value::operator[](const std::string& key) { return (*this)[key.c_str()]; }
+  Value& Value::operator[](const string& key) { return (*this)[key.c_str()]; }
 
-  const Value& Value::operator[](const std::string& key) const { return (*this)[key.c_str()]; }
+  const Value& Value::operator[](const string& key) const { return (*this)[key.c_str()]; }
 
   Value& Value::operator[](const StaticString& key) { return resolveReference(key, true); }
 
@@ -2095,7 +2097,7 @@ ValueIteratorBase::ValueIteratorBase()
 	  return value == &null ? defaultValue : *value;
   }
 
-  Value Value::get(const std::string& key, const Value& defaultValue) const { return get(key.c_str(), defaultValue); }
+  Value Value::get(const string& key, const Value& defaultValue) const { return get(key.c_str(), defaultValue); }
 
   Value Value::removeMember(const char* key) {
 	  JSON_ASSERT(type_ == nullValue || type_ == objectValue);
@@ -2119,7 +2121,7 @@ ValueIteratorBase::ValueIteratorBase()
   #endif
   }
 
-  Value Value::removeMember(const std::string& key) { return removeMember(key.c_str()); }
+  Value Value::removeMember(const string& key) { return removeMember(key.c_str()); }
 
   #ifdef JSON_USE_CPPTL
   Value Value::get(const CppTL::ConstString& key, const Value& defaultValue) const { return get(key.c_str(), defaultValue); }
@@ -2130,7 +2132,7 @@ ValueIteratorBase::ValueIteratorBase()
 	  return value != &null;
   }
 
-  bool Value::isMember(const std::string& key) const { return isMember(key.c_str()); }
+  bool Value::isMember(const string& key) const { return isMember(key.c_str()); }
 
   #ifdef JSON_USE_CPPTL
   bool Value::isMember(const CppTL::ConstString& key) const { return isMember(key.c_str()); }
@@ -2144,13 +2146,13 @@ ValueIteratorBase::ValueIteratorBase()
   #ifndef JSON_VALUE_USE_INTERNAL_MAP
 	  ObjectValues::const_iterator it = value_.map_->begin();
 	  ObjectValues::const_iterator itEnd = value_.map_->end();
-	  for (; it != itEnd; ++it) members.push_back(std::string((*it).first.c_str()));
+	  for (; it != itEnd; ++it) members.push_back(string((*it).first.c_str()));
   #else
 	  ValueInternalMap::IteratorState it;
 	  ValueInternalMap::IteratorState itEnd;
 	  value_.map_->makeBeginIterator(it);
 	  value_.map_->makeEndIterator(itEnd);
-	  for (; !ValueInternalMap::equals(it, itEnd); ValueInternalMap::increment(it)) members.push_back(std::string(ValueInternalMap::key(it)));
+	  for (; !ValueInternalMap::equals(it, itEnd); ValueInternalMap::increment(it)) members.push_back(string(ValueInternalMap::key(it)));
   #endif
 	  return members;
   }
@@ -2278,16 +2280,16 @@ ValueIteratorBase::ValueIteratorBase()
 	  comments_[placement].setComment(comment);
   }
 
-  void Value::setComment(const std::string& comment, CommentPlacement placement) { setComment(comment.c_str(), placement); }
+  void Value::setComment(const string& comment, CommentPlacement placement) { setComment(comment.c_str(), placement); }
 
   bool Value::hasComment(CommentPlacement placement) const { return comments_ != nullptr && comments_[placement].comment_ != nullptr; }
 
-  std::string Value::getComment(CommentPlacement placement) const {
+  string Value::getComment(CommentPlacement placement) const {
 	  if (hasComment(placement)) return comments_[placement].comment_;
 	  return "";
   }
 
-  std::string Value::toStyledString() const {
+  string Value::toStyledString() const {
 	  StyledWriter writer;
 	  return writer.write(*this);
   }
@@ -2417,12 +2419,12 @@ ValueIteratorBase::ValueIteratorBase()
 
   PathArgument::PathArgument(const char* key) : key_(key), index_(), kind_(kindKey) {}
 
-  PathArgument::PathArgument(const std::string& key) : key_(key.c_str()), index_(), kind_(kindKey) {}
+  PathArgument::PathArgument(const string& key) : key_(key.c_str()), index_(), kind_(kindKey) {}
 
   // class Path
   // //////////////////////////////////////////////////////////////////
 
-  Path::Path(const std::string& path, const PathArgument& a1, const PathArgument& a2, const PathArgument& a3, const PathArgument& a4, const PathArgument& a5) {
+  Path::Path(const string& path, const PathArgument& a1, const PathArgument& a2, const PathArgument& a3, const PathArgument& a4, const PathArgument& a5) {
 	  InArgs in;
 	  in.push_back(&a1);
 	  in.push_back(&a2);
@@ -2432,7 +2434,7 @@ ValueIteratorBase::ValueIteratorBase()
 	  makePath(path, in);
   }
 
-  void Path::makePath(const std::string& path, const InArgs& in) {
+  void Path::makePath(const string& path, const InArgs& in) {
 	  const char* current = path.c_str();
 	  const char* end = current + path.size();
 	  InArgs::const_iterator itInArg = in.begin();
@@ -2455,12 +2457,12 @@ ValueIteratorBase::ValueIteratorBase()
 		  } else {
 			  const char* beginName = current;
 			  while (current != end && !strchr("[.", *current)) ++current;
-			  args_.push_back(std::string(beginName, current));
+			  args_.push_back(string(beginName, current));
 		  }
 	  }
   }
 
-  void Path::addPathInArg(const std::string&, const InArgs& in, InArgs::const_iterator& itInArg, PathArgument::Kind kind) {
+  void Path::addPathInArg(const string&, const InArgs& in, InArgs::const_iterator& itInArg, PathArgument::Kind kind) {
 	  if (itInArg == in.end()) {
 		  // Error: missing argument %d
 	  } else if ((*itInArg)->kind_ != kind) {
@@ -2470,7 +2472,7 @@ ValueIteratorBase::ValueIteratorBase()
 	  }
   }
 
-  void Path::invalidPath(const std::string&, int) {
+  void Path::invalidPath(const string&, int) {
 	  // Error: invalid path.
   }
 
@@ -2570,7 +2572,7 @@ ValueIteratorBase::ValueIteratorBase()
 	  return false;
   }
 
-  std::string valueToString(LargestInt value) {
+  string valueToString(LargestInt value) {
 	  UIntToStringBuffer buffer;
 	  char* current = buffer + sizeof(buffer);
 	  bool isNegative = value < 0;
@@ -2581,7 +2583,7 @@ ValueIteratorBase::ValueIteratorBase()
 	  return current;
   }
 
-  std::string valueToString(LargestUInt value) {
+  string valueToString(LargestUInt value) {
 	  UIntToStringBuffer buffer;
 	  char* current = buffer + sizeof(buffer);
 	  uintToString(value, current);
@@ -2591,13 +2593,13 @@ ValueIteratorBase::ValueIteratorBase()
 
   #if defined(JSON_HAS_INT64)
 
-  std::string valueToString(Int value) { return valueToString(LargestInt(value)); }
+  string valueToString(Int value) { return valueToString(LargestInt(value)); }
 
-  std::string valueToString(UInt value) { return valueToString(LargestUInt(value)); }
+  string valueToString(UInt value) { return valueToString(LargestUInt(value)); }
 
   #endif // # if defined(JSON_HAS_INT64)
 
-  std::string valueToString(double value) {
+  string valueToString(double value) {
 	  char buffer[32];
   #if defined(_MSC_VER) && defined(__STDC_SECURE_LIB__) // Use secure version with visual studio 2005 to avoid warning.
 	  sprintf_s(buffer, sizeof(buffer), "%#.16g", value);
@@ -2635,17 +2637,17 @@ ValueIteratorBase::ValueIteratorBase()
 	  return buffer;
   }
 
-  std::string valueToString(bool value) { return value ? "true" : "false"; }
+  string valueToString(bool value) { return value ? "true" : "false"; }
 
-  std::string valueToQuotedString(const char* value) {
+  string valueToQuotedString(const char* value) {
 	  if (value == nullptr) return "";
 	  // Not sure how to handle unicode...
-	  if (strpbrk(value, "\"\\\b\f\n\r\t") == nullptr && !containsControlCharacter(value)) return std::string("\"") + value + "\"";
+	  if (strpbrk(value, "\"\\\b\f\n\r\t") == nullptr && !containsControlCharacter(value)) return string("\"") + value + "\"";
 	  // We have to walk value and escape any special characters.
-	  // Appending to std::string is not efficient, but this should be rare.
+	  // Appending to string is not efficient, but this should be rare.
 	  // (Note: forward slashes are *not* rare, but I am not escaping them.)
-	  std::string::size_type maxsize = strlen(value) * 2 + 3; // allescaped+quotes+NULL
-	  std::string result;
+	  string::size_type maxsize = strlen(value) * 2 + 3; // allescaped+quotes+NULL
+	  string result;
 	  result.reserve(maxsize); // to avoid lots of mallocs
 	  result += "\"";
 	  for (const char* c = value; *c != 0; ++c) {
@@ -2681,8 +2683,8 @@ ValueIteratorBase::ValueIteratorBase()
 		  // sequence from occurring.
 		  default:
 			  if (isControlCharacter(*c)) {
-				  std::ostringstream oss;
-				  oss << "\\u" << std::hex << std::uppercase << std::setfill('0') << std::setw(4) << static_cast<int>(*c);
+				  ostringstream oss;
+				  oss << "\\u" << hex << uppercase << setfill('0') << setw(4) << static_cast<int>(*c);
 				  result += oss.str();
 			  } else {
 				  result += *c;
@@ -2707,7 +2709,7 @@ ValueIteratorBase::ValueIteratorBase()
 
   void FastWriter::dropNullPlaceholders() { dropNullPlaceholders_ = true; }
 
-  std::string FastWriter::write(const Value& root) {
+  string FastWriter::write(const Value& root) {
 	  document_ = "";
 	  writeValue(root);
 	  document_ += "\n";
@@ -2747,7 +2749,7 @@ ValueIteratorBase::ValueIteratorBase()
 		  Value::Members members(value.getMemberNames());
 		  document_ += "{";
 		  for (Value::Members::iterator it = members.begin(); it != members.end(); ++it) {
-			  const std::string& name = *it;
+			  const string& name = *it;
 			  if (it != members.begin()) document_ += ",";
 			  document_ += valueToQuotedString(name.c_str());
 			  document_ += yamlCompatiblityEnabled_ ? ": " : ":";
@@ -2763,7 +2765,7 @@ ValueIteratorBase::ValueIteratorBase()
 
   StyledWriter::StyledWriter() : rightMargin_(74), indentSize_(3), addChildValues_() {}
 
-  std::string StyledWriter::write(const Value& root) {
+  string StyledWriter::write(const Value& root) {
 	  document_ = "";
 	  addChildValues_ = false;
 	  indentString_ = "";
@@ -2806,7 +2808,7 @@ ValueIteratorBase::ValueIteratorBase()
 			  indent();
 			  Value::Members::iterator it = members.begin();
 			  for (;;) {
-				  const std::string& name = *it;
+				  const string& name = *it;
 				  const Value& childValue = value[name];
 				  writeCommentBeforeValue(childValue);
 				  writeWithIndent(valueToQuotedString(name.c_str()));
@@ -2892,7 +2894,7 @@ ValueIteratorBase::ValueIteratorBase()
 	  return isMultiLine;
   }
 
-  void StyledWriter::pushValue(const std::string& value) {
+  void StyledWriter::pushValue(const string& value) {
 	  if (addChildValues_)
 		  childValues_.push_back(value);
 	  else
@@ -2910,12 +2912,12 @@ ValueIteratorBase::ValueIteratorBase()
 	  document_ += indentString_;
   }
 
-  void StyledWriter::writeWithIndent(const std::string& value) {
+  void StyledWriter::writeWithIndent(const string& value) {
 	  writeIndent();
 	  document_ += value;
   }
 
-  void StyledWriter::indent() { indentString_ += std::string(indentSize_, ' '); }
+  void StyledWriter::indent() { indentString_ += string(indentSize_, ' '); }
 
   void StyledWriter::unindent() {
 	  assert(int(indentString_.size()) >= indentSize_);
@@ -2940,8 +2942,8 @@ ValueIteratorBase::ValueIteratorBase()
 
   bool StyledWriter::hasCommentForValue(const Value& value) { return value.hasComment(commentBefore) || value.hasComment(commentAfterOnSameLine) || value.hasComment(commentAfter); }
 
-  std::string StyledWriter::normalizeEOL(const std::string& text) {
-	  std::string normalized;
+  string StyledWriter::normalizeEOL(const string& text) {
+	  string normalized;
 	  normalized.reserve(text.size());
 	  const char* begin = text.c_str();
 	  const char* end = begin + text.size();
@@ -2962,9 +2964,9 @@ ValueIteratorBase::ValueIteratorBase()
   // Class StyledStreamWriter
   // //////////////////////////////////////////////////////////////////
 
-  StyledStreamWriter::StyledStreamWriter(std::string indentation) : document_(nullptr), rightMargin_(74), indentation_(indentation), addChildValues_() {}
+  StyledStreamWriter::StyledStreamWriter(string indentation) : document_(nullptr), rightMargin_(74), indentation_(indentation), addChildValues_() {}
 
-  void StyledStreamWriter::write(std::ostream& out, const Value& root) {
+  void StyledStreamWriter::write(ostream& out, const Value& root) {
 	  document_ = &out;
 	  addChildValues_ = false;
 	  indentString_ = "";
@@ -3007,7 +3009,7 @@ ValueIteratorBase::ValueIteratorBase()
 			  indent();
 			  Value::Members::iterator it = members.begin();
 			  for (;;) {
-				  const std::string& name = *it;
+				  const string& name = *it;
 				  const Value& childValue = value[name];
 				  writeCommentBeforeValue(childValue);
 				  writeWithIndent(valueToQuotedString(name.c_str()));
@@ -3093,7 +3095,7 @@ ValueIteratorBase::ValueIteratorBase()
 	  return isMultiLine;
   }
 
-  void StyledStreamWriter::pushValue(const std::string& value) {
+  void StyledStreamWriter::pushValue(const string& value) {
 	  if (addChildValues_)
 		  childValues_.push_back(value);
 	  else
@@ -3116,7 +3118,7 @@ ValueIteratorBase::ValueIteratorBase()
 	  *document_ << '\n' << indentString_;
   }
 
-  void StyledStreamWriter::writeWithIndent(const std::string& value) {
+  void StyledStreamWriter::writeWithIndent(const string& value) {
 	  writeIndent();
 	  *document_ << value;
   }
@@ -3146,8 +3148,8 @@ ValueIteratorBase::ValueIteratorBase()
 
   bool StyledStreamWriter::hasCommentForValue(const Value& value) { return value.hasComment(commentBefore) || value.hasComment(commentAfterOnSameLine) || value.hasComment(commentAfter); }
 
-  std::string StyledStreamWriter::normalizeEOL(const std::string& text) {
-	  std::string normalized;
+  string StyledStreamWriter::normalizeEOL(const string& text) {
+	  string normalized;
 	  normalized.reserve(text.size());
 	  const char* begin = text.c_str();
 	  const char* end = begin + text.size();
@@ -3165,7 +3167,7 @@ ValueIteratorBase::ValueIteratorBase()
 	  return normalized;
   }
 
-  std::ostream& operator<<(std::ostream& sout, const Value& root) {
+  ostream& operator<<(ostream& sout, const Value& root) {
 	  Json::StyledStreamWriter writer;
 	  writer.write(sout, root);
 	  return sout;
