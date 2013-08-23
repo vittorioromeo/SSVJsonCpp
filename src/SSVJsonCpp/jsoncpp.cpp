@@ -93,7 +93,7 @@ using namespace std;
 namespace Json {
 
 /// Converts a unicode code-point to UTF-8.
-static inline string codePointToUTF8(unsigned int cp) {
+inline static string codePointToUTF8(unsigned int cp) {
 	string result;
 
 	// based on description from http://en.wikipedia.org/wiki/UTF-8
@@ -122,7 +122,7 @@ static inline string codePointToUTF8(unsigned int cp) {
 }
 
 /// Returns true if ch is a control character (in range [0,32[).
-static inline bool isControlCharacter(char ch) { return ch > 0 && ch <= 0x1F; }
+inline static bool isControlCharacter(char ch) { return ch > 0 && ch <= 0x1F; }
 
 enum {
 	/// Constant that specify the size of the buffer that must be passed to uintToString.
@@ -137,7 +137,7 @@ typedef char UIntToStringBuffer[uintToStringBufferSize];
 * @param current Input/Output string buffer.
 *        Must have at least uintToStringBufferSize chars free.
 */
-static inline void uintToString(LargestUInt value, char*& current) {
+inline static void uintToString(LargestUInt value, char*& current) {
 	*--current = 0;
 	do {
 		*--current = char(value % 10) + '0';
@@ -197,12 +197,12 @@ Features Features::strictMode() {
 // Implementation of class Reader
 // ////////////////////////////////
 
-static inline bool in(Reader::Char c, Reader::Char c1, Reader::Char c2, Reader::Char c3, Reader::Char c4) { return c == c1 || c == c2 || c == c3 || c == c4; }
+inline static bool in(Reader::Char c, Reader::Char c1, Reader::Char c2, Reader::Char c3, Reader::Char c4) { return c == c1 || c == c2 || c == c3 || c == c4; }
 
-static inline bool in(Reader::Char c, Reader::Char c1, Reader::Char c2, Reader::Char c3, Reader::Char c4, Reader::Char c5) { return c == c1 || c == c2 || c == c3 || c == c4 || c == c5; }
+inline static bool in(Reader::Char c, Reader::Char c1, Reader::Char c2, Reader::Char c3, Reader::Char c4, Reader::Char c5) { return c == c1 || c == c2 || c == c3 || c == c4 || c == c5; }
 
 static bool containsNewLine(Reader::Location begin, Reader::Location end) {
-	for (; begin < end; ++begin)
+	for(; begin < end; ++begin)
 		if (*begin == '\n' || *begin == '\r') return true;
 	return false;
 }
@@ -530,7 +530,7 @@ bool Reader::readArray(Token& /*tokenStart*/) {
 		return true;
 	}
 	int index = 0;
-	for (;;) {
+	for(;;) {
 		Value& value = currentValue()[index++];
 		nodes_.push(&value);
 		bool ok = readValue();
@@ -555,7 +555,7 @@ bool Reader::readArray(Token& /*tokenStart*/) {
 
 bool Reader::decodeNumber(Token& token) {
 	bool isDouble = false;
-	for (Location inspect = token.start_; inspect != token.end_; ++inspect) {
+	for(Location inspect = token.start_; inspect != token.end_; ++inspect) {
 		isDouble = isDouble || in(*inspect, '.', 'e', 'E', '+') || (*inspect == '-' && inspect != token.start_);
 	}
 	if (isDouble) return decodeDouble(token);
@@ -704,7 +704,7 @@ bool Reader::decodeUnicodeCodePoint(Token& token, Location& current, Location en
 bool Reader::decodeUnicodeEscapeSequence(Token& token, Location& current, Location end, unsigned int& unicode) {
 	if (end - current < 4) return addError("Bad unicode escape sequence in string: four digits expected.", token, current);
 	unicode = 0;
-	for (int index = 0; index < 4; ++index) {
+	for(int index = 0; index < 4; ++index) {
 		Char c = *current++;
 		unicode *= 16;
 		if (c >= '0' && c <= '9')
@@ -731,7 +731,7 @@ bool Reader::addError(const string& message, Token& token, Location extra) {
 bool Reader::recoverFromError(TokenType skipUntilToken) {
 	int errorCount = int(errors_.size());
 	Token skip;
-	for (;;) {
+	for(;;) {
 		if (!readToken(skip)) errors_.resize(errorCount); // discard errors caused by recovery
 		if (skip.type_ == skipUntilToken || skip.type_ == tokenEndOfStream) break;
 	}
@@ -784,7 +784,7 @@ string Reader::getFormatedErrorMessages() const { return getFormattedErrorMessag
 
 string Reader::getFormattedErrorMessages() const {
 	string formattedMessage;
-	for (Errors::const_iterator itError = errors_.begin(); itError != errors_.end(); ++itError) {
+	for(Errors::const_iterator itError = errors_.begin(); itError != errors_.end(); ++itError) {
 		const ErrorInfo& error = *itError;
 		formattedMessage += "* " + getLocationLineAndColumn(error.token_.start_) + "\n";
 		formattedMessage += "  " + error.message_ + "\n";
@@ -841,7 +841,7 @@ namespace Json {
 * The in-place new operator must be used to construct the object using the pointer
 * returned by allocate.
 */
-template <typename AllocatedType, const unsigned int objectPerAllocation> class BatchAllocator {
+template<typename AllocatedType, const unsigned int objectPerAllocation> class BatchAllocator {
   public:
 	BatchAllocator(unsigned int objectsPerPage = 255) : freeHead_(0), objectsPerPage_(objectsPerPage) {
 		//      printf( "Size: %d => %s\n", sizeof(AllocatedType), typeid(AllocatedType).name() );
@@ -852,7 +852,7 @@ template <typename AllocatedType, const unsigned int objectPerAllocation> class 
 	}
 
 	~BatchAllocator() {
-		for (BatchInfo* batch = batches_; batch;) {
+		for(BatchInfo* batch = batches_; batch;) {
 			BatchInfo* nextBatch = batch->next_;
 			free(batch);
 			batch = nextBatch;
@@ -1017,7 +1017,7 @@ ValueIteratorBase::ValueIteratorBase()
 	  // Using a portable hand-made version for non random iterator instead:
 	  //   return difference_type( distance( current_, other.current_ ) );
 	  difference_type myDistance = 0;
-	  for (Value::ObjectValues::iterator it = current_; it != other.current_; ++it) {
+	  for(Value::ObjectValues::iterator it = current_; it != other.current_; ++it) {
 		  ++myDistance;
 	  }
 	  return myDistance;
@@ -1196,13 +1196,13 @@ ValueIteratorBase::ValueIteratorBase()
   static const unsigned int unknown = (unsigned)-1;
 
   #if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
-  template <typename T, typename U> static inline bool InRange(double d, T min, U max) { return d >= min && d <= max; }
+  template<typename T, typename U> inline static bool InRange(double d, T min, U max) { return d >= min && d <= max; }
   #else // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
-  static inline double integerToDouble(Json::UInt64 value) { return static_cast<double>(Int64(value / 2)) * 2.0 + Int64(value & 1); }
+  inline static double integerToDouble(Json::UInt64 value) { return static_cast<double>(Int64(value / 2)) * 2.0 + Int64(value & 1); }
 
-  template <typename T> static inline double integerToDouble(T value) { return static_cast<double>(value); }
+  template<typename T> inline static double integerToDouble(T value) { return static_cast<double>(value); }
 
-  template <typename T, typename U> static inline bool InRange(double d, T min, U max) { return d >= integerToDouble(min) && d <= integerToDouble(max); }
+  template<typename T, typename U> inline static bool InRange(double d, T min, U max) { return d >= integerToDouble(min) && d <= integerToDouble(max); }
   #endif // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
 
   /** Duplicates the specified string value.
@@ -1212,7 +1212,7 @@ ValueIteratorBase::ValueIteratorBase()
   *               computed using strlen(value).
   * @return Pointer on the duplicate instance of string.
   */
-  static inline char* duplicateStringValue(const char* value, unsigned int length = unknown) {
+  inline static char* duplicateStringValue(const char* value, unsigned int length = unknown) {
 	  if (length == unknown) length = (unsigned int)strlen(value);
 
 	  // Avoid an integer overflow in the call to malloc below by limiting length
@@ -1228,7 +1228,7 @@ ValueIteratorBase::ValueIteratorBase()
 
   /** Free the string duplicated by duplicateStringValue().
   */
-  static inline void releaseStringValue(char* value) {
+  inline static void releaseStringValue(char* value) {
 	  if (value) free(value);
   }
 
@@ -1560,7 +1560,7 @@ ValueIteratorBase::ValueIteratorBase()
 	  }
 	  if (other.comments_) {
 		  comments_ = new CommentInfo[numberOfCommentPlacement];
-		  for (int comment = 0; comment < numberOfCommentPlacement; ++comment) {
+		  for(int comment = 0; comment < numberOfCommentPlacement; ++comment) {
 			  const CommentInfo& otherComment = other.comments_[comment];
 			  if (otherComment.comment_) comments_[comment].setComment(otherComment.comment_);
 		  }
@@ -1988,7 +1988,7 @@ ValueIteratorBase::ValueIteratorBase()
 	  else if (newSize > oldSize)
 		  (*this)[newSize - 1];
 	  else {
-		  for (ArrayIndex index = newSize; index < oldSize; ++index) {
+		  for(ArrayIndex index = newSize; index < oldSize; ++index) {
 			  value_.map_->erase(index);
 		  }
 		  assert(size() == newSize);
@@ -2146,13 +2146,13 @@ ValueIteratorBase::ValueIteratorBase()
   #ifndef JSON_VALUE_USE_INTERNAL_MAP
 	  ObjectValues::const_iterator it = value_.map_->begin();
 	  ObjectValues::const_iterator itEnd = value_.map_->end();
-	  for (; it != itEnd; ++it) members.push_back(string((*it).first.c_str()));
+	  for(; it != itEnd; ++it) members.push_back(string((*it).first.c_str()));
   #else
 	  ValueInternalMap::IteratorState it;
 	  ValueInternalMap::IteratorState itEnd;
 	  value_.map_->makeBeginIterator(it);
 	  value_.map_->makeEndIterator(itEnd);
-	  for (; !ValueInternalMap::equals(it, itEnd); ValueInternalMap::increment(it)) members.push_back(string(ValueInternalMap::key(it)));
+	  for(; !ValueInternalMap::equals(it, itEnd); ValueInternalMap::increment(it)) members.push_back(string(ValueInternalMap::key(it)));
   #endif
 	  return members;
   }
@@ -2445,7 +2445,7 @@ ValueIteratorBase::ValueIteratorBase()
 				  addPathInArg(path, in, itInArg, PathArgument::kindIndex);
 			  else {
 				  ArrayIndex index = 0;
-				  for (; current != end && *current >= '0' && *current <= '9'; ++current) index = index * 10 + ArrayIndex(*current - '0');
+				  for(; current != end && *current >= '0' && *current <= '9'; ++current) index = index * 10 + ArrayIndex(*current - '0');
 				  args_.push_back(index);
 			  }
 			  if (current == end || *current++ != ']') invalidPath(path, int(current - path.c_str()));
@@ -2478,7 +2478,7 @@ ValueIteratorBase::ValueIteratorBase()
 
   const Value& Path::resolve(const Value& root) const {
 	  const Value* node = &root;
-	  for (Args::const_iterator it = args_.begin(); it != args_.end(); ++it) {
+	  for(Args::const_iterator it = args_.begin(); it != args_.end(); ++it) {
 		  const PathArgument& arg = *it;
 		  if (arg.kind_ == PathArgument::kindIndex) {
 			  if (!node->isArray() || !node->isValidIndex(arg.index_)) {
@@ -2500,7 +2500,7 @@ ValueIteratorBase::ValueIteratorBase()
 
   Value Path::resolve(const Value& root, const Value& defaultValue) const {
 	  const Value* node = &root;
-	  for (Args::const_iterator it = args_.begin(); it != args_.end(); ++it) {
+	  for(Args::const_iterator it = args_.begin(); it != args_.end(); ++it) {
 		  const PathArgument& arg = *it;
 		  if (arg.kind_ == PathArgument::kindIndex) {
 			  if (!node->isArray() || !node->isValidIndex(arg.index_)) return defaultValue;
@@ -2516,7 +2516,7 @@ ValueIteratorBase::ValueIteratorBase()
 
   Value& Path::make(Value& root) const {
 	  Value* node = &root;
-	  for (Args::const_iterator it = args_.begin(); it != args_.end(); ++it) {
+	  for(Args::const_iterator it = args_.begin(); it != args_.end(); ++it) {
 		  const PathArgument& arg = *it;
 		  if (arg.kind_ == PathArgument::kindIndex) {
 			  if (!node->isArray()) {
@@ -2650,7 +2650,7 @@ ValueIteratorBase::ValueIteratorBase()
 	  string result;
 	  result.reserve(maxsize); // to avoid lots of mallocs
 	  result += "\"";
-	  for (const char* c = value; *c != 0; ++c) {
+	  for(const char* c = value; *c != 0; ++c) {
 		  switch (*c) {
 		  case '\"':
 			  result += "\\\"";
@@ -2739,7 +2739,7 @@ ValueIteratorBase::ValueIteratorBase()
 	  case arrayValue: {
 		  document_ += "[";
 		  int size = value.size();
-		  for (int index = 0; index < size; ++index) {
+		  for(int index = 0; index < size; ++index) {
 			  if (index > 0) document_ += ",";
 			  writeValue(value[index]);
 		  }
@@ -2748,7 +2748,7 @@ ValueIteratorBase::ValueIteratorBase()
 	  case objectValue: {
 		  Value::Members members(value.getMemberNames());
 		  document_ += "{";
-		  for (Value::Members::iterator it = members.begin(); it != members.end(); ++it) {
+		  for(Value::Members::iterator it = members.begin(); it != members.end(); ++it) {
 			  const string& name = *it;
 			  if (it != members.begin()) document_ += ",";
 			  document_ += valueToQuotedString(name.c_str());
@@ -2807,7 +2807,7 @@ ValueIteratorBase::ValueIteratorBase()
 			  writeWithIndent("{");
 			  indent();
 			  Value::Members::iterator it = members.begin();
-			  for (;;) {
+			  for(;;) {
 				  const string& name = *it;
 				  const Value& childValue = value[name];
 				  writeCommentBeforeValue(childValue);
@@ -2839,7 +2839,7 @@ ValueIteratorBase::ValueIteratorBase()
 			  indent();
 			  bool hasChildValue = !childValues_.empty();
 			  unsigned index = 0;
-			  for (;;) {
+			  for(;;) {
 				  const Value& childValue = value[index];
 				  writeCommentBeforeValue(childValue);
 				  if (hasChildValue)
@@ -2861,7 +2861,7 @@ ValueIteratorBase::ValueIteratorBase()
 			  {
 			  assert(childValues_.size() == size);
 			  document_ += "[ ";
-			  for (unsigned index = 0; index < size; ++index) {
+			  for(unsigned index = 0; index < size; ++index) {
 				  if (index > 0) document_ += ", ";
 				  document_ += childValues_[index];
 			  }
@@ -2874,7 +2874,7 @@ ValueIteratorBase::ValueIteratorBase()
 	  int size = value.size();
 	  bool isMultiLine = size * 3 >= rightMargin_;
 	  childValues_.clear();
-	  for (int index = 0; index < size && !isMultiLine; ++index) {
+	  for(int index = 0; index < size && !isMultiLine; ++index) {
 		  const Value& childValue = value[index];
 		  isMultiLine = isMultiLine || ((childValue.isArray() || childValue.isObject()) && childValue.size() > 0);
 	  }
@@ -2883,7 +2883,7 @@ ValueIteratorBase::ValueIteratorBase()
 		  childValues_.reserve(size);
 		  addChildValues_ = true;
 		  int lineLength = 4 + (size - 1) * 2; // '[ ' + ', '*n + ' ]'
-		  for (int index = 0; index < size && !isMultiLine; ++index) {
+		  for(int index = 0; index < size && !isMultiLine; ++index) {
 			  writeValue(value[index]);
 			  lineLength += int(childValues_[index].size());
 			  isMultiLine = isMultiLine && hasCommentForValue(value[index]);
@@ -3008,7 +3008,7 @@ ValueIteratorBase::ValueIteratorBase()
 			  writeWithIndent("{");
 			  indent();
 			  Value::Members::iterator it = members.begin();
-			  for (;;) {
+			  for(;;) {
 				  const string& name = *it;
 				  const Value& childValue = value[name];
 				  writeCommentBeforeValue(childValue);
@@ -3040,7 +3040,7 @@ ValueIteratorBase::ValueIteratorBase()
 			  indent();
 			  bool hasChildValue = !childValues_.empty();
 			  unsigned index = 0;
-			  for (;;) {
+			  for(;;) {
 				  const Value& childValue = value[index];
 				  writeCommentBeforeValue(childValue);
 				  if (hasChildValue)
@@ -3062,7 +3062,7 @@ ValueIteratorBase::ValueIteratorBase()
 			  {
 			  assert(childValues_.size() == size);
 			  *document_ << "[ ";
-			  for (unsigned index = 0; index < size; ++index) {
+			  for(unsigned index = 0; index < size; ++index) {
 				  if (index > 0) *document_ << ", ";
 				  *document_ << childValues_[index];
 			  }
@@ -3075,7 +3075,7 @@ ValueIteratorBase::ValueIteratorBase()
 	  int size = value.size();
 	  bool isMultiLine = size * 3 >= rightMargin_;
 	  childValues_.clear();
-	  for (int index = 0; index < size && !isMultiLine; ++index) {
+	  for(int index = 0; index < size && !isMultiLine; ++index) {
 		  const Value& childValue = value[index];
 		  isMultiLine = isMultiLine || ((childValue.isArray() || childValue.isObject()) && childValue.size() > 0);
 	  }
@@ -3084,7 +3084,7 @@ ValueIteratorBase::ValueIteratorBase()
 		  childValues_.reserve(size);
 		  addChildValues_ = true;
 		  int lineLength = 4 + (size - 1) * 2; // '[ ' + ', '*n + ' ]'
-		  for (int index = 0; index < size && !isMultiLine; ++index) {
+		  for(int index = 0; index < size && !isMultiLine; ++index) {
 			  writeValue(value[index]);
 			  lineLength += int(childValues_[index].size());
 			  isMultiLine = isMultiLine && hasCommentForValue(value[index]);

@@ -158,23 +158,23 @@ license you like.
 #endif // if !defined(JSONCPP_DEPRECATED)
 
 namespace Json {
-	typedef int Int;
-	typedef unsigned int UInt;
+	using Int = int;
+	using UInt = unsigned int;
 # if defined(JSON_NO_INT64)
-	typedef int LargestInt;
-	typedef unsigned int LargestUInt;
+	using LargestInt = int;
+	using LargestUInt = unsigned int;
 #  undef JSON_HAS_INT64
 # else // if defined(JSON_NO_INT64)
 	// For Microsoft Visual use specific types as long long is not supported
 #  if defined(_MSC_VER) // Microsoft Visual Studio
-	typedef __int64 Int64;
-	typedef unsigned __int64 UInt64;
+	using Int64 = __int64 ;
+	using UInt64 = unsigned __int64 ;
 #  else // if defined(_MSC_VER) // Other platforms, use long long
-	typedef long long int Int64;
-	typedef unsigned long long int UInt64;
+	using Int64 = long long int;
+	using UInt64 = unsigned long long int ;
 #  endif // if defined(_MSC_VER)
-	typedef Int64 LargestInt;
-	typedef UInt64 LargestUInt;
+	using LargestInt = Int64;
+	usign LargestUInt = UInt64;
 #  define JSON_HAS_INT64
 # endif // if defined(JSON_NO_INT64)
 } // end namespace Json
@@ -220,7 +220,7 @@ namespace Json {
 	class Features;
 
 	// value.h
-	typedef unsigned int ArrayIndex;
+	using ArrayIndex = unsigned int;
 	class StaticString;
 	class Path;
 	class PathArgument;
