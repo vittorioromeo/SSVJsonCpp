@@ -1867,7 +1867,7 @@ ValueIteratorBase::ValueIteratorBase()
 	  case nullValue:
 		  return 0.0;
 	  case booleanValue:
-		  return value_.bool_ ? 1.0f : 0.0f;
+		  return value_.bool_ ? 1.f : 0.f;
 	  default:
 		  break;
 	  }
