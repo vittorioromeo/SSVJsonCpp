@@ -1173,10 +1173,10 @@ public: // overridden from ValueArrayAllocator
 										  ValueInternalArray::PageIndex minNewIndexCount )
    {
 	  ValueInternalArray::PageIndex newIndexCount = (indexCount*3)/2 + 1;
-	  if ( minNewIndexCount > newIndexCount )
+	  if( minNewIndexCount > newIndexCount )
 		 newIndexCount = minNewIndexCount;
 	  void *newIndexes = realloc( indexes, sizeof(Value*) * newIndexCount );
-	  if ( !newIndexes )
+	  if( !newIndexes )
 		 throw std::bad_alloc();
 	  indexCount = newIndexCount;
 	  indexes = static_cast<Value **>( newIndexes );
@@ -1184,7 +1184,7 @@ public: // overridden from ValueArrayAllocator
    virtual void releaseArrayPageIndex( Value **indexes,
 									   ValueInternalArray::PageIndex indexCount )
    {
-	  if ( indexes )
+	  if( indexes )
 		 free( indexes );
    }
 
@@ -1195,7 +1195,7 @@ public: // overridden from ValueArrayAllocator
 
    virtual void releaseArrayPage( Value *value )
    {
-	  if ( value )
+	  if( value )
 		 free( value );
    }
 };
@@ -1899,7 +1899,7 @@ namespace Json {
 
 #endif
 
-#define JSON_ASSERT_MESSAGE( condition, message ) if (!( condition )) { JSON_FAIL_MESSAGE( message ) }
+#define JSON_ASSERT_MESSAGE( condition, message ) if(!( condition )) { JSON_FAIL_MESSAGE( message ) }
 
 #endif // CPPTL_JSON_ASSERTIONS_H_INCLUDED
 
