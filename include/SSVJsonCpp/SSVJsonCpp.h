@@ -6,5 +6,6 @@
 #define SSVJSONCPP
 
 #include "json/json.h"
+#include "json/jsoncpp.inl"
 
 #endif
