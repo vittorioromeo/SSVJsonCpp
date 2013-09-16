@@ -21,7 +21,6 @@
 #include <iomanip>
 #include <cstddef>
 
-#define JSON_ASSERT(condition) assert(condition);
 #define JSON_FAIL_MESSAGE(message) throw std::runtime_error(message);
 #define JSON_ASSERT_MESSAGE(condition, message) if(!(condition)) { JSON_FAIL_MESSAGE(message) }
 #define JSON_HAS_INT64
@@ -58,10 +57,7 @@ namespace Json
 		}
 		inline Features() : allowComments_(true), strictRoot_(false) { }
 	};
-}
 
-namespace Json
-{
 	enum ValueType{nullValue = 0, intValue, uintValue, realValue, stringValue, booleanValue, arrayValue, objectValue};
 	enum CommentPlacement{commentBefore = 0, commentAfterOnSameLine, commentAfter, numberOfCommentPlacement};
 	class StaticString
@@ -138,16 +134,27 @@ namespace Json
 			Value(bool value);
 			Value(const Value& other);
 			~Value();
-			Value& operator=(const Value& other);
+			inline Value& operator=(const Value& other)
+			{
+				Value temp(other);
+				swap(temp);
+				return *this;
+			}
+			inline ValueType type() const { return type_; }
+			inline int compare(const Value& other) const
+			{
+				if(*this < other) return -1;
+				if(*this > other) return 1;
+				return 0;
+			}
 			void swap(Value& other);
-			ValueType type() const;
+
 			bool operator<(const Value& other) const;
-			bool operator<=(const Value& other) const;
-			bool operator>=(const Value& other) const;
-			bool operator>(const Value& other) const;
+			inline bool operator<=(const Value& other) const { return !(other < *this); }
+			inline bool operator>=(const Value& other) const { return !(*this < other); }
+			inline bool operator>(const Value& other) const { return other < *this; }
 			bool operator==(const Value& other) const;
 			bool operator!=(const Value& other) const;
-			int compare(const Value& other) const;
 			const char* asCString() const;
 			std::string asString() const;
 			int asInt() const;
@@ -251,7 +258,7 @@ namespace Json
 	class Path
 	{
 		private:
-			typedef std::vector<const PathArgument *> InArgs;
+			typedef std::vector<const PathArgument*> InArgs;
 			typedef std::vector<PathArgument> Args;
 			void makePath(const std::string& path, const InArgs &in);
 			void addPathInArg(const std::string& path, const InArgs &in, InArgs::const_iterator &itInArg, PathArgument::Kind kind);
@@ -337,10 +344,7 @@ namespace Json
 			inline SelfType& operator++()		{ increment(); return *this; }
 			inline reference operator*() const	{ return deref(); }
 	};
-}
 
-namespace Json
-{
 	class Reader
 	{
 		public:
@@ -353,34 +357,11 @@ namespace Json
 			bool parse(std::istream &is, Value& root, bool collectComments = true);
 			std::string getFormattedErrorMessages() const;
 		private:
-			enum TokenType
-			{
-				tokenEndOfStream = 0,
-				tokenObjectBegin,
-				tokenObjectEnd,
-				tokenArrayBegin,
-				tokenArrayEnd,
-				tokenString,
-				tokenNumber,
-				tokenTrue,
-				tokenFalse,
-				tokenNull,
-				tokenArraySeparator,
-				tokenMemberSeparator,
-				tokenComment,
-				tokenError
-			};
-			struct Token
-			{
-				TokenType type_;
-				Location start_, end_;
-			};
-			struct ErrorInfo
-			{
-				Token token_;
-				std::string message_;
-				Location extra_;
-			};
+			enum TokenType {tokenEndOfStream = 0, tokenObjectBegin, tokenObjectEnd, tokenArrayBegin, tokenArrayEnd, tokenString,
+				tokenNumber, tokenTrue, tokenFalse, tokenNull, tokenArraySeparator, tokenMemberSeparator, tokenComment, tokenError};
+			struct Token { TokenType type_; Location start_, end_; };
+			struct ErrorInfo { Token token_; std::string message_; Location extra_; };
+
 			typedef std::deque<ErrorInfo> Errors;
 			bool expectToken(TokenType type, Token &token, const char* message);
 			bool readToken(Token &token);
@@ -424,11 +405,7 @@ namespace Json
 			bool collectComments_;
 	};
 	std::istream& operator>>(std::istream&, Value&);
-}
 
-
-namespace Json
-{
 	class Value;
 	struct Writer
 	{
@@ -507,7 +484,7 @@ namespace Json
 			bool addChildValues_;
 	};
 	static const Value nullJsonValue{};
-	#if defined(JSON_HAS_INT64)
+	#ifdef JSON_HAS_INT64
 		std::string valueToString(int value);
 		std::string valueToString(UInt value);
 	#endif
